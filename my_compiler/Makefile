@@ -1,15 +1,18 @@
 # Minimal Makefile for my_compiler (textual LLVM IR only)
 
 CXX := g++
-CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -Iinclude -MMD -MP
+CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -Iinclude -Ibuild -MMD -MP
 LDFLAGS :=
+FLEX :=
+BISON := bison
 
 BIN := build/my_compiler
 
 SOURCES := \
   main.cpp \
   src/lexer/lexer.cpp \
-  src/parser/parser.cpp \
+  src/parser/driver.cpp \
+  src/parser/yylex_adapter.cpp \
   src/semantic/semantic.cpp \
   src/semantic/symbol_table.cpp \
   src/semantic/type_system.cpp \
@@ -19,17 +22,32 @@ SOURCES := \
   src/utils/logger.cpp \
   src/utils/error.cpp
 
-OBJECTS := $(patsubst %.cpp, build/%.o, $(SOURCES))
+GENERATED_CPP := build/parser.tab.cpp
+GENERATED_HDR := build/parser.tab.h
+
+OBJECTS := $(patsubst %.cpp, build/%.o, $(SOURCES)) \
+           $(patsubst build/%.cpp, build/%.o, $(GENERATED_CPP))
 DEPS := $(OBJECTS:.o=.d)
 
 .PHONY: all clean run dirs
 
 all: $(BIN)
 
+# Flex/Bison generation
+build/parser.tab.cpp build/parser.tab.h: src/parser/parser.y | dirs
+	$(BISON) -d -o build/parser.tab.cpp --defines=build/parser.tab.h src/parser/parser.y
+
+build/lexer.yy.cpp:
+	@true
+
 $(BIN): $(OBJECTS) | dirs
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
 
 build/%.o: %.cpp | dirs
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+build/%.o: build/%.cpp | dirs
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

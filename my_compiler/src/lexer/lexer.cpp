@@ -65,6 +65,7 @@ Token Lexer::scan() {
         else if (s=="void") t.kind=TokenKind::KwVoid;
         else if (s=="enum") t.kind=TokenKind::KwEnum;
         else if (s=="union") t.kind=TokenKind::KwUnion;
+        else if (s=="struct") t.kind=TokenKind::KwStruct;
         else if (s=="if") t.kind=TokenKind::KwIf;
         else if (s=="else") t.kind=TokenKind::KwElse;
         else if (s=="for") t.kind=TokenKind::KwFor;

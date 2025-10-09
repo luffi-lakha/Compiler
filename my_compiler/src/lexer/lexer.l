@@ -3,7 +3,8 @@
 #include "parser.tab.h"
 #include <cstdio>
 #include <cstdlib>
-int yylineno = 1;
+extern int yylineno;
+extern YYSTYPE yylval;
 %}
 
 WS      [ \t\r]+
@@ -23,6 +24,7 @@ NUM     [0-9]+
 "char"             { return KW_CHAR; }
 "float"            { return KW_FLOAT; }
 "void"             { return KW_VOID; }
+"struct"           { return KW_STRUCT; }
 "if"               { return KW_IF; }
 "else"             { return KW_ELSE; }
 "for"              { return KW_FOR; }
@@ -62,8 +64,8 @@ NUM     [0-9]+
 ","                { return ','; }
 ";"                { return ';'; }
 
-{NUM}               { return INTEGER; }
-{ID}                { return IDENTIFIER; }
+{NUM}               { yylval.ival = strtol(yytext, NULL, 10); return INTEGER; }
+{ID}                { yylval.str = strdup(yytext); return IDENTIFIER; }
 
 .                   { /* ignore unknown single char */ }
 

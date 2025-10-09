@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "lexer.h"
 #include "parser.hpp"
 #include "semantic.h"
 #include "ir_generator.h"
@@ -22,14 +21,9 @@ int main(int argc, char** argv) {
 
     std::ifstream in(inPath);
     if (!in) { std::cerr << "cannot open: " << inPath << "\n"; return 1; }
-    std::ostringstream ss; ss << in.rdbuf();
-
-    Lexer lex(ss.str());
-    Parser parser(lex);
-
     std::unique_ptr<Program> prog;
     try {
-        prog = parser.parseProgram();
+        prog = parseFile(inPath);
     } catch (const std::exception& ex) {
         std::cerr << inPath << ": syntax error: " << ex.what() << "\n";
         return 1;
